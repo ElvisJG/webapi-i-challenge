@@ -8,11 +8,30 @@ const port = 5000;
 const server = express();
 
 server.get('/api/users', (req, res) => {
+  const { name, bio } = req.body;
+
+  if (!name || !bio) {
+    res.status(400).json({ message: 'Please provide name and bio' });
+  } else {
+    Data.insert(req.body)
+      .then(user => {
+        res.status(201).json(user);
+      })
+      .catch(err => {
+        res.status(500).json({
+          err: err,
+          message: 'failed to retrieve users'
+        });
+      });
+  }
+});
+
+server.get('/api/users', (req, res) => {
   Data.find()
     .then(users => {
       users
         ? res.json(users)
-        : res.status(418).json({ message: 'invalid as heck' });
+        : res.status(418).json({ message: 'Invalid as heck' });
     })
     .catch(err => {
       res.status(500).json({
