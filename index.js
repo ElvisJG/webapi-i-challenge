@@ -6,6 +6,7 @@ const Data = require('./data/db.js');
 const port = 5000;
 
 const server = express();
+server.use(express.json());
 
 server.post('/api/users', (req, res) => {
   const { name, bio } = req.body;
