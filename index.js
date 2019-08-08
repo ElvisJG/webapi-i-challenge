@@ -7,11 +7,13 @@ const port = 5000;
 
 const server = express();
 
-server.get('/api/users', (req, res) => {
+server.post('/api/users', (req, res) => {
   const { name, bio } = req.body;
 
   if (!name || !bio) {
-    res.status(400).json({ message: 'Please provide name and bio' });
+    res
+      .status(400)
+      .json({ message: 'Please provide name and bio for the user.' });
   } else {
     Data.insert(req.body)
       .then(user => {
@@ -36,7 +38,7 @@ server.get('/api/users', (req, res) => {
     .catch(err => {
       res.status(500).json({
         err: err,
-        message: 'failed to retrieve users'
+        error: 'The users information could not be retrieved.'
       });
     });
 });
@@ -46,7 +48,26 @@ server.get('/api/users/:id', (req, res) => {
     .then(user => {
       user
         ? res.status(200).json(user)
-        : res.status(418).json({ message: 'Invalid as heck' });
+        : res.status(404).json({
+            message: 'The user with the specified ID does not exist.'
+          });
+    })
+    .catch(err => {
+      res.status(500).json({
+        err: err,
+        message: 'Failed to retrieve user'
+      });
+    });
+});
+
+server.delete('/api/users/:id', (req, res) => {
+  Data.remove(req.params.id)
+    .then(id => {
+      id
+        ? res.status(200).json(id)
+        : res.status(404).json({
+            message: 'The user with the specified ID does not exist.'
+          });
     })
     .catch(err => {
       res.status(500).json({
@@ -54,6 +75,31 @@ server.get('/api/users/:id', (req, res) => {
         message: 'failed to retrieve user'
       });
     });
+});
+
+server.put('/api/users/:id', (req, res) => {
+  const { name, bio } = req.body;
+
+  if (!name || !bio) {
+    res.status(400).json({
+      errorMessage: 'Please provide name and bio for the user.'
+    });
+  } else {
+    Data.update(req.params.id, req.body)
+      .then(user => {
+        user
+          ? res.status(200).json(user)
+          : res
+              .status(404)
+              .json({ message: 'User with specified ID does not exist' });
+      })
+      .catch(err => {
+        res.status(500).json({
+          err: err,
+          error: 'User information ccould not be modified'
+        });
+      });
+  }
 });
 
 server.listen(port, () => {
